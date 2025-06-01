@@ -62,51 +62,62 @@
     <button onclick="addCrane()">추가</button>
   </div>
 
-  <script>
-    // 기억 저장 배열
-    let memories = JSON.parse(localStorage.getItem("memories") || "[]");
+<script>
+  const memories = JSON.parse(localStorage.getItem("memories") || "[]");
 
-    function saveMemories() {
-      localStorage.setItem("memories", JSON.stringify(memories));
-    }
+  function renderCrane(memory) {
+    const bottle = document.getElementById("bottle");
 
-    function createCrane(memory, left, top) {
-      const bottle = document.getElementById("bottle");
-      const crane = document.createElement("img");
-      crane.src = "crane_transparent.png";
-      crane.className = "crane";
-      crane.style.left = left + "px";
-      crane.style.top = top + "px";
-      crane.setAttribute("data-memory", memory);
+    const craneContainer = document.createElement("div");
+    craneContainer.style.position = "absolute";
+    craneContainer.style.left = memory.left + "px";
+    craneContainer.style.top = memory.top + "px";
 
-      crane.onclick = () => {
-        alert("📌 기억: " + crane.getAttribute("data-memory"));
-      };
+    const crane = document.createElement("img");
+    crane.src = "crane_transparent.png";
+    crane.className = "crane";
 
-      bottle.appendChild(crane);
-    }
+    const note = document.createElement("div");
+    note.textContent = memory.text;
+    note.style.position = "absolute";
+    note.style.top = "-35px";
+    note.style.left = "0px";
+    note.style.background = "#fff0f6";
+    note.style.padding = "5px 8px";
+    note.style.borderRadius = "12px";
+    note.style.fontSize = "13px";
+    note.style.maxWidth = "100px";
+    note.style.wordBreak = "break-word";
+    note.style.textAlign = "center";
+    note.style.fontFamily = "'Segoe UI', 'Apple SD Gothic Neo', sans-serif";
+    note.style.boxShadow = "0 2px 6px rgba(0,0,0,0.15)";
+    note.style.color = "#a33366";
+    note.style.border = "1px solid #f5c1d4";
+    note.style.zIndex = "2";
 
-    function addCrane() {
-      const input = document.getElementById("memoryInput");
-      const text = input.value.trim();
-      if (text === "") return;
+    craneContainer.appendChild(note);
+    craneContainer.appendChild(crane);
+    bottle.appendChild(craneContainer);
+  }
 
-      const left = Math.random() * 250;
-      const top = Math.random() * 250;
+  function addCrane() {
+    const input = document.getElementById("memoryInput");
+    const text = input.value.trim();
+    if (text === "") return;
 
-      createCrane(text, left, top);
-      memories.push({ text, left, top });
-      saveMemories();
+    const left = Math.random() * 250;
+    const top = Math.random() * 250;
 
-      input.value = "";
-    }
+    const memory = { text, left, top };
+    memories.push(memory);
+    localStorage.setItem("memories", JSON.stringify(memories));
 
-    // 저장된 기억 불러오기
-    window.onload = () => {
-      memories.forEach(m => {
-        createCrane(m.text, m.left, m.top);
-      });
-    };
-  </script>
+    renderCrane(memory);
+    input.value = "";
+  }
+
+  // 페이지 로드 시 저장된 기억 불러오기
+  memories.forEach(renderCrane);
+</script>
 </body>
 </html>
