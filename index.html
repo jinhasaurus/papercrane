@@ -49,6 +49,7 @@
       border: 1px solid #f5c1d4;
       z-index: 2;
       display: none; /* 기본은 숨김 */
+      pointer-events: none; /* 쪽지 자체는 클릭 안 되게 */
     }
 
     #form {
@@ -108,11 +109,7 @@
 
       // 클릭하면 쪽지 토글 보이기/숨기기
       crane.onclick = () => {
-        if (note.style.display === "none") {
-          note.style.display = "block";
-        } else {
-          note.style.display = "none";
-        }
+        note.style.display = (note.style.display === "none") ? "block" : "none";
       };
     }
 
@@ -122,8 +119,8 @@
       const text = input.value.trim();
       if (text === "") return;
 
-      const left = Math.random() * 250;
-      const top = Math.random() * 250;
+      const left = Math.random() * 220; // 여백 조정 (300 - 80)
+      const top = Math.random() * 220;
 
       const memory = { text, left, top };
       memories.push(memory);
