@@ -27,9 +27,28 @@
 
     .crane {
       position: absolute;
-      width: 50px;
-      transition: all 0.3s;
+      width: 80px; /* 종이학 크기 키움 */
       cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .note {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: #fff0f6;
+      padding: 5px 8px;
+      border-radius: 12px;
+      font-size: 13px;
+      max-width: 120px;
+      word-break: break-word;
+      text-align: center;
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      color: #a33366;
+      border: 1px solid #f5c1d4;
+      z-index: 2;
+      display: none; /* 기본은 숨김 */
     }
 
     #form {
@@ -62,62 +81,60 @@
     <button onclick="addCrane()">추가</button>
   </div>
 
-<script>
-  const memories = JSON.parse(localStorage.getItem("memories") || "[]");
+  <script>
+    // 저장된 기억 불러오기 (없으면 빈 배열)
+    const memories = JSON.parse(localStorage.getItem("memories") || "[]");
 
-  function renderCrane(memory) {
-    const bottle = document.getElementById("bottle");
+    // 종이학 + 쪽지 그리기 함수
+    function renderCrane(memory) {
+      const bottle = document.getElementById("bottle");
 
-    const craneContainer = document.createElement("div");
-    craneContainer.style.position = "absolute";
-    craneContainer.style.left = memory.left + "px";
-    craneContainer.style.top = memory.top + "px";
+      const craneContainer = document.createElement("div");
+      craneContainer.style.position = "absolute";
+      craneContainer.style.left = memory.left + "px";
+      craneContainer.style.top = memory.top + "px";
 
-    const crane = document.createElement("img");
-    crane.src = "crane_transparent.png";
-    crane.className = "crane";
+      const crane = document.createElement("img");
+      crane.src = "crane_transparent.png";
+      crane.className = "crane";
 
-    const note = document.createElement("div");
-    note.textContent = memory.text;
-    note.style.position = "absolute";
-    note.style.top = "-35px";
-    note.style.left = "0px";
-    note.style.background = "#fff0f6";
-    note.style.padding = "5px 8px";
-    note.style.borderRadius = "12px";
-    note.style.fontSize = "13px";
-    note.style.maxWidth = "100px";
-    note.style.wordBreak = "break-word";
-    note.style.textAlign = "center";
-    note.style.fontFamily = "'Segoe UI', 'Apple SD Gothic Neo', sans-serif";
-    note.style.boxShadow = "0 2px 6px rgba(0,0,0,0.15)";
-    note.style.color = "#a33366";
-    note.style.border = "1px solid #f5c1d4";
-    note.style.zIndex = "2";
+      const note = document.createElement("div");
+      note.className = "note";
+      note.textContent = memory.text;
 
-    craneContainer.appendChild(note);
-    craneContainer.appendChild(crane);
-    bottle.appendChild(craneContainer);
-  }
+      craneContainer.appendChild(note);
+      craneContainer.appendChild(crane);
+      bottle.appendChild(craneContainer);
 
-  function addCrane() {
-    const input = document.getElementById("memoryInput");
-    const text = input.value.trim();
-    if (text === "") return;
+      // 클릭하면 쪽지 토글 보이기/숨기기
+      crane.onclick = () => {
+        if (note.style.display === "none") {
+          note.style.display = "block";
+        } else {
+          note.style.display = "none";
+        }
+      };
+    }
 
-    const left = Math.random() * 250;
-    const top = Math.random() * 250;
+    // 기억 추가 함수
+    function addCrane() {
+      const input = document.getElementById("memoryInput");
+      const text = input.value.trim();
+      if (text === "") return;
 
-    const memory = { text, left, top };
-    memories.push(memory);
-    localStorage.setItem("memories", JSON.stringify(memories));
+      const left = Math.random() * 250;
+      const top = Math.random() * 250;
 
-    renderCrane(memory);
-    input.value = "";
-  }
+      const memory = { text, left, top };
+      memories.push(memory);
+      localStorage.setItem("memories", JSON.stringify(memories));
 
-  // 페이지 로드 시 저장된 기억 불러오기
-  memories.forEach(renderCrane);
-</script>
+      renderCrane(memory);
+      input.value = "";
+    }
+
+    // 페이지 로드 시 저장된 기억 모두 렌더링
+    memories.forEach(renderCrane);
+  </script>
 </body>
 </html>
