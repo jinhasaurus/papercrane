@@ -27,29 +27,9 @@
 
     .crane {
       position: absolute;
-      width: 80px; /* 종이학 크기 키움 */
-      cursor: pointer;
+      width: 70px; /* 종이학 크기 키움 */
       transition: all 0.3s;
-    }
-
-    .note {
-      position: absolute;
-      top: -40px;
-      left: 0;
-      background: #fff0f6;
-      padding: 5px 8px;
-      border-radius: 12px;
-      font-size: 13px;
-      max-width: 120px;
-      word-break: break-word;
-      text-align: center;
-      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      color: #a33366;
-      border: 1px solid #f5c1d4;
-      z-index: 2;
-      display: none; /* 기본은 숨김 */
-      pointer-events: none; /* 쪽지 자체는 클릭 안 되게 */
+      cursor: pointer;
     }
 
     #form {
@@ -70,6 +50,32 @@
       margin-left: 8px;
       border-radius: 6px;
     }
+
+    #resetBtn {
+      margin-top: 15px;
+      background-color: #e57373;
+      color: white;
+    }
+
+    .note {
+      position: absolute;
+      top: -35px;
+      left: 0px;
+      background: #fff0f6;
+      padding: 5px 8px;
+      border-radius: 12px;
+      font-size: 13px;
+      max-width: 100px;
+      word-break: break-word;
+      text-align: center;
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      color: #a33366;
+      border: 1px solid #f5c1d4;
+      z-index: 2;
+      display: none; /* 기본은 숨김 */
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -82,56 +88,64 @@
     <button onclick="addCrane()">추가</button>
   </div>
 
-  <script>
-    // 저장된 기억 불러오기 (없으면 빈 배열)
-    const memories = JSON.parse(localStorage.getItem("memories") || "[]");
+  <button id="resetBtn" onclick="resetMemories()">기억 리셋</button>
 
-    // 종이학 + 쪽지 그리기 함수
-    function renderCrane(memory) {
-      const bottle = document.getElementById("bottle");
+<script>
+  const memories = JSON.parse(localStorage.getItem("memories") || "[]");
 
-      const craneContainer = document.createElement("div");
-      craneContainer.style.position = "absolute";
-      craneContainer.style.left = memory.left + "px";
-      craneContainer.style.top = memory.top + "px";
+  function renderCrane(memory) {
+    const bottle = document.getElementById("bottle");
 
-      const crane = document.createElement("img");
-      crane.src = "crane_transparent.png";
-      crane.className = "crane";
+    const craneContainer = document.createElement("div");
+    craneContainer.style.position = "absolute";
+    craneContainer.style.left = memory.left + "px";
+    craneContainer.style.top = memory.top + "px";
 
-      const note = document.createElement("div");
-      note.className = "note";
-      note.textContent = memory.text;
+    const crane = document.createElement("img");
+    crane.src = "crane_transparent.png";
+    crane.className = "crane";
 
-      craneContainer.appendChild(note);
-      craneContainer.appendChild(crane);
-      bottle.appendChild(craneContainer);
+    const note = document.createElement("div");
+    note.textContent = memory.text;
+    note.className = "note";
 
-      // 클릭하면 쪽지 토글 보이기/숨기기
-      crane.onclick = () => {
-        note.style.display = (note.style.display === "none") ? "block" : "none";
-      };
-    }
+    // 크레인을 클릭하면 메모 보이기/숨기기 토글
+    crane.onclick = () => {
+      if (note.style.display === "none") {
+        note.style.display = "block";
+      } else {
+        note.style.display = "none";
+      }
+    };
 
-    // 기억 추가 함수
-    function addCrane() {
-      const input = document.getElementById("memoryInput");
-      const text = input.value.trim();
-      if (text === "") return;
+    craneContainer.appendChild(note);
+    craneContainer.appendChild(crane);
+    bottle.appendChild(craneContainer);
+  }
 
-      const left = Math.random() * 220; // 여백 조정 (300 - 80)
-      const top = Math.random() * 220;
+  function addCrane() {
+    const input = document.getElementById("memoryInput");
+    const text = input.value.trim();
+    if (text === "") return;
 
-      const memory = { text, left, top };
-      memories.push(memory);
-      localStorage.setItem("memories", JSON.stringify(memories));
+    const left = Math.random() * 230;  // 300 - 70 (종이학 넓이)
+    const top = Math.random() * 230;
 
-      renderCrane(memory);
-      input.value = "";
-    }
+    const memory = { text, left, top };
+    memories.push(memory);
+    localStorage.setItem("memories", JSON.stringify(memories));
 
-    // 페이지 로드 시 저장된 기억 모두 렌더링
-    memories.forEach(renderCrane);
-  </script>
+    renderCrane(memory);
+    input.value = "";
+  }
+
+  function resetMemories() {
+    localStorage.removeItem("memories");
+    location.reload();
+  }
+
+  // 저장된 기억 불러오기
+  memories.forEach(renderCrane);
+</script>
 </body>
 </html>
