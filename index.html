@@ -18,7 +18,7 @@
       position: relative;
       width: 300px;
       height: 300px;
-      background-image: url('./bottle_transparent.png');
+      background-image: url('bottle_transparent.png');
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
@@ -63,29 +63,50 @@
   </div>
 
   <script>
-    function addCrane() {
-      const input = document.getElementById("memoryInput");
-      const text = input.value.trim();
-      if (text === "") return;
+    // 기억 저장 배열
+    let memories = JSON.parse(localStorage.getItem("memories") || "[]");
 
+    function saveMemories() {
+      localStorage.setItem("memories", JSON.stringify(memories));
+    }
+
+    function createCrane(memory, left, top) {
       const bottle = document.getElementById("bottle");
       const crane = document.createElement("img");
-      crane.src = "./crane_transparent.png"; // ✅ 경로 수정
+      crane.src = "crane_transparent.png";
       crane.className = "crane";
-
-      const maxLeft = 250; 
-      const maxTop = 250;
-      crane.style.left = Math.random() * maxLeft + "px";
-      crane.style.top = Math.random() * maxTop + "px";
-      crane.setAttribute("data-memory", text);
+      crane.style.left = left + "px";
+      crane.style.top = top + "px";
+      crane.setAttribute("data-memory", memory);
 
       crane.onclick = () => {
         alert("📌 기억: " + crane.getAttribute("data-memory"));
       };
 
       bottle.appendChild(crane);
+    }
+
+    function addCrane() {
+      const input = document.getElementById("memoryInput");
+      const text = input.value.trim();
+      if (text === "") return;
+
+      const left = Math.random() * 250;
+      const top = Math.random() * 250;
+
+      createCrane(text, left, top);
+      memories.push({ text, left, top });
+      saveMemories();
+
       input.value = "";
     }
+
+    // 저장된 기억 불러오기
+    window.onload = () => {
+      memories.forEach(m => {
+        createCrane(m.text, m.left, m.top);
+      });
+    };
   </script>
 </body>
 </html>
