@@ -3,19 +3,22 @@
 <head>
   <meta charset="UTF-8" />
   <title>기억 유리병</title>
+  <!-- 고운돋움 폰트 -->
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap" rel="stylesheet">
   <style>
     body {
       background: #fffafc;
       display: flex;
       flex-direction: column;
       align-items: center;
-      font-family: "Arial", sans-serif;
+      font-family: 'Gowun Dodum', sans-serif;
       margin: 0;
       padding: 30px;
     }
 
     h1 {
-      color: #d26b9e;
+      margin-bottom: 20px;
+      color: #a33366;
     }
 
     #bottle {
@@ -26,111 +29,79 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
-      overflow: hidden;
+      margin-bottom: 30px;
     }
 
     .crane {
       position: absolute;
       width: 70px;
-      transition: all 0.3s;
       cursor: pointer;
-      z-index: 1;
+      transition: transform 0.3s ease;
     }
 
-    #memoryInputBox {
+    #form {
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 20px;
-      background-color: #ffe6f0;
-      padding: 20px;
-      border-radius: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      gap: 10px;
     }
 
     #memoryInput {
-      padding: 14px;
+      width: 250px;
+      height: 80px;
+      padding: 10px;
       font-size: 16px;
-      width: 260px;
-      height: 100px;
-      resize: none;
-      border: 1px solid #f0a9cc;
-      border-radius: 12px;
-      margin-bottom: 12px;
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    #memoryInput::placeholder {
-      color: #d777a9;
-    }
-
-    #saveBtn {
-      padding: 10px 20px;
-      background-color: #f7c5e0;
-      border: none;
       border-radius: 8px;
-      cursor: pointer;
-      font-size: 15px;
+      border: 1px solid #ccc;
+      resize: none;
+      font-family: 'Gowun Dodum', sans-serif;
     }
 
-    #resetBtn {
-      margin-top: 15px;
-      background-color: #e57373;
-      color: white;
-      padding: 8px 12px;
+    button {
+      padding: 10px 16px;
       font-size: 16px;
+      background-color: #f7c5e0;
       border: none;
       cursor: pointer;
       border-radius: 6px;
+      font-family: 'Gowun Dodum', sans-serif;
     }
 
-    /* 모달 스타일 */
-    #noteModal {
-      display: none;
+    #resetBtn {
+      margin-top: 20px;
+      background-color: #e57373;
+      color: white;
+    }
+
+    /* 쪽지 전체 팝업 */
+    #popupNote {
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      background: rgba(0, 0, 0, 0.4);
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-
-    #noteContent {
-      position: relative;
-      width: 300px;
-      height: 250px;
-      background-image: url('note.png');
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: url('note.png') no-repeat center center;
       background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      display: flex;
+      width: 300px;
+      height: 200px;
+      display: none;
       justify-content: center;
       align-items: center;
       text-align: center;
       padding: 20px;
-    }
-
-    #noteText {
+      z-index: 1000;
       font-size: 16px;
-      color: #7a1c40;
-      font-family: 'Segoe UI', sans-serif;
-      word-break: break-word;
-      max-width: 220px;
+      line-height: 1.6;
+      color: #6a1b44;
+      font-family: 'Gowun Dodum', sans-serif;
     }
 
-    #closeModal {
+    #closePopup {
       position: absolute;
       top: 10px;
-      right: 10px;
-      background: #ffccda;
-      border: none;
-      border-radius: 50%;
-      width: 24px;
-      height: 24px;
+      right: 15px;
+      font-size: 20px;
       font-weight: bold;
+      color: #a33366;
       cursor: pointer;
     }
   </style>
@@ -140,74 +111,69 @@
 
   <div id="bottle"></div>
 
-  <div id="memoryInputBox">
-    <textarea id="memoryInput" placeholder="기억을 적어보세요 🌸"></textarea>
-    <button id="saveBtn">기억 저장</button>
+  <div id="form">
+    <textarea id="memoryInput" placeholder="기억을 적어주세요"></textarea>
+    <button onclick="addCrane()">쪽지 넣기</button>
   </div>
 
   <button id="resetBtn" onclick="resetMemories()">기억 리셋</button>
 
-  <!-- 모달 쪽지 -->
-  <div id="noteModal">
-    <div id="noteContent">
-      <button id="closeModal">X</button>
-      <div id="noteText"></div>
-    </div>
+  <!-- 팝업 쪽지 -->
+  <div id="popupNote">
+    <div id="closePopup" onclick="closePopup()">×</div>
+    <div id="popupText"></div>
   </div>
 
-  <script>
-    const memories = JSON.parse(localStorage.getItem("memories") || "[]");
+<script>
+  const memories = JSON.parse(localStorage.getItem("memories") || "[]");
+
+  function renderCrane(memory) {
     const bottle = document.getElementById("bottle");
-    const memoryInput = document.getElementById("memoryInput");
-    const noteModal = document.getElementById("noteModal");
-    const noteText = document.getElementById("noteText");
-    const closeModal = document.getElementById("closeModal");
 
-    document.getElementById("saveBtn").onclick = () => {
-      const text = memoryInput.value.trim();
-      if (text === "") return;
+    const crane = document.createElement("img");
+    crane.src = "crane_transparent.png";
+    crane.className = "crane";
+    crane.style.left = memory.left + "px";
+    crane.style.top = memory.top + "px";
 
-      // 범위 제한 (유리병 내)
-      const left = Math.random() * 220;
-      const top = Math.random() * 220;
+    crane.addEventListener("click", () => {
+      document.getElementById("popupText").textContent = memory.text;
+      document.getElementById("popupNote").style.display = "flex";
+    });
 
-      const memory = { text, left, top };
-      memories.push(memory);
-      localStorage.setItem("memories", JSON.stringify(memories));
+    bottle.appendChild(crane);
+  }
 
-      renderCrane(memory);
-      memoryInput.value = "";
-    };
+  function addCrane() {
+    const input = document.getElementById("memoryInput");
+    const text = input.value.trim();
+    if (text === "") return;
 
-    function renderCrane(memory) {
-      const craneContainer = document.createElement("div");
-      craneContainer.style.position = "absolute";
-      craneContainer.style.left = memory.left + "px";
-      craneContainer.style.top = memory.top + "px";
+    const bottle = document.getElementById("bottle");
+    const maxLeft = bottle.clientWidth - 70;
+    const maxTop = bottle.clientHeight - 70;
 
-      const crane = document.createElement("img");
-      crane.src = "crane_transparent.png";
-      crane.className = "crane";
+    const left = Math.random() * maxLeft;
+    const top = Math.random() * maxTop;
 
-      crane.onclick = () => {
-        noteText.textContent = memory.text;
-        noteModal.style.display = "flex";
-      };
+    const memory = { text, left, top };
+    memories.push(memory);
+    localStorage.setItem("memories", JSON.stringify(memories));
 
-      craneContainer.appendChild(crane);
-      bottle.appendChild(craneContainer);
-    }
+    renderCrane(memory);
+    input.value = "";
+  }
 
-    closeModal.onclick = () => {
-      noteModal.style.display = "none";
-    };
+  function resetMemories() {
+    localStorage.removeItem("memories");
+    location.reload();
+  }
 
-    function resetMemories() {
-      localStorage.removeItem("memories");
-      location.reload();
-    }
+  function closePopup() {
+    document.getElementById("popupNote").style.display = "none";
+  }
 
-    memories.forEach(renderCrane);
-  </script>
+  memories.forEach(renderCrane);
+</script>
 </body>
 </html>
