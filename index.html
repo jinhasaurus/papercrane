@@ -27,34 +27,9 @@
 
     .crane {
       position: absolute;
-      width: 70px; /* 종이학 크기 키움 */
+      width: 70px;
       transition: all 0.3s;
       cursor: pointer;
-    }
-
-    #form {
-      margin-top: 20px;
-    }
-
-    input {
-      padding: 8px;
-      font-size: 16px;
-    }
-
-    button {
-      padding: 8px 12px;
-      font-size: 16px;
-      background-color: #f7c5e0;
-      border: none;
-      cursor: pointer;
-      margin-left: 8px;
-      border-radius: 6px;
-    }
-
-    #resetBtn {
-      margin-top: 15px;
-      background-color: #e57373;
-      color: white;
     }
 
     .note {
@@ -73,8 +48,58 @@
       color: #a33366;
       border: 1px solid #f5c1d4;
       z-index: 2;
-      display: none; /* 기본은 숨김 */
+      display: none;
       pointer-events: none;
+    }
+
+    #writeBtn {
+      padding: 10px 16px;
+      font-size: 16px;
+      background-color: #f7c5e0;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-top: 20px;
+    }
+
+    #noteImage {
+      display: none;
+      margin-top: 20px;
+      cursor: pointer;
+      width: 150px;
+    }
+
+    #memoryInputBox {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    #memoryInput {
+      padding: 8px;
+      font-size: 16px;
+      width: 200px;
+      margin-bottom: 10px;
+    }
+
+    #saveBtn {
+      padding: 6px 12px;
+      background-color: #f7c5e0;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    #resetBtn {
+      margin-top: 15px;
+      background-color: #e57373;
+      color: white;
+      padding: 8px 12px;
+      font-size: 16px;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
     }
   </style>
 </head>
@@ -83,69 +108,81 @@
 
   <div id="bottle"></div>
 
-  <div id="form">
+  <button id="writeBtn">쪽지 쓰기</button>
+
+  <img id="noteImage" src="note.png" alt="쪽지 이미지" />
+
+  <div id="memoryInputBox">
     <input id="memoryInput" type="text" placeholder="기억을 적어주세요" />
-    <button onclick="addCrane()">추가</button>
+    <button id="saveBtn">저장</button>
   </div>
 
   <button id="resetBtn" onclick="resetMemories()">기억 리셋</button>
 
-<script>
-  const memories = JSON.parse(localStorage.getItem("memories") || "[]");
+  <script>
+    const memories = JSON.parse(localStorage.getItem("memories") || "[]");
 
-  function renderCrane(memory) {
     const bottle = document.getElementById("bottle");
+    const noteImage = document.getElementById("noteImage");
+    const memoryInputBox = document.getElementById("memoryInputBox");
+    const memoryInput = document.getElementById("memoryInput");
 
-    const craneContainer = document.createElement("div");
-    craneContainer.style.position = "absolute";
-    craneContainer.style.left = memory.left + "px";
-    craneContainer.style.top = memory.top + "px";
-
-    const crane = document.createElement("img");
-    crane.src = "crane_transparent.png";
-    crane.className = "crane";
-
-    const note = document.createElement("div");
-    note.textContent = memory.text;
-    note.className = "note";
-
-    // 크레인을 클릭하면 메모 보이기/숨기기 토글
-    crane.onclick = () => {
-      if (note.style.display === "none") {
-        note.style.display = "block";
-      } else {
-        note.style.display = "none";
-      }
+    document.getElementById("writeBtn").onclick = () => {
+      noteImage.style.display = "block";
+      memoryInputBox.style.display = "none";
     };
 
-    craneContainer.appendChild(note);
-    craneContainer.appendChild(crane);
-    bottle.appendChild(craneContainer);
-  }
+    noteImage.onclick = () => {
+      memoryInputBox.style.display = "flex";
+    };
 
-  function addCrane() {
-    const input = document.getElementById("memoryInput");
-    const text = input.value.trim();
-    if (text === "") return;
+    document.getElementById("saveBtn").onclick = () => {
+      const text = memoryInput.value.trim();
+      if (text === "") return;
 
-    const left = Math.random() * 230;  // 300 - 70 (종이학 넓이)
-    const top = Math.random() * 230;
+      const left = Math.random() * 230;
+      const top = Math.random() * 230;
 
-    const memory = { text, left, top };
-    memories.push(memory);
-    localStorage.setItem("memories", JSON.stringify(memories));
+      const memory = { text, left, top };
+      memories.push(memory);
+      localStorage.setItem("memories", JSON.stringify(memories));
 
-    renderCrane(memory);
-    input.value = "";
-  }
+      renderCrane(memory);
+      memoryInput.value = "";
+      memoryInputBox.style.display = "none";
+      noteImage.style.display = "none";
+    };
 
-  function resetMemories() {
-    localStorage.removeItem("memories");
-    location.reload();
-  }
+    function renderCrane(memory) {
+      const craneContainer = document.createElement("div");
+      craneContainer.style.position = "absolute";
+      craneContainer.style.left = memory.left + "px";
+      craneContainer.style.top = memory.top + "px";
 
-  // 저장된 기억 불러오기
-  memories.forEach(renderCrane);
-</script>
+      const crane = document.createElement("img");
+      crane.src = "crane_transparent.png";
+      crane.className = "crane";
+
+      const note = document.createElement("div");
+      note.textContent = memory.text;
+      note.className = "note";
+
+      crane.onclick = () => {
+        note.style.display = note.style.display === "none" ? "block" : "none";
+      };
+
+      craneContainer.appendChild(note);
+      craneContainer.appendChild(crane);
+      bottle.appendChild(craneContainer);
+    }
+
+    function resetMemories() {
+      localStorage.removeItem("memories");
+      location.reload();
+    }
+
+    // 기존 저장된 기억 렌더링
+    memories.forEach(renderCrane);
+  </script>
 </body>
 </html>
