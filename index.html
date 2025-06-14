@@ -26,6 +26,7 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
+      overflow: hidden;
     }
 
     .crane {
@@ -34,32 +35,6 @@
       transition: all 0.3s;
       cursor: pointer;
       z-index: 1;
-    }
-
-    .note-container {
-      position: absolute;
-      top: -100px;
-      left: -20px;
-      width: 120px;
-      height: 90px;
-      background-image: url('note.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: center;
-      display: none;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 10px;
-      z-index: 2;
-    }
-
-    .note-text {
-      font-size: 13px;
-      color: #a33366;
-      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
-      word-break: break-word;
-      max-width: 100px;
     }
 
     #memoryInputBox {
@@ -74,12 +49,15 @@
     }
 
     #memoryInput {
-      padding: 10px;
+      padding: 14px;
       font-size: 16px;
-      width: 240px;
+      width: 260px;
+      height: 100px;
+      resize: none;
       border: 1px solid #f0a9cc;
       border-radius: 12px;
       margin-bottom: 12px;
+      font-family: 'Segoe UI', sans-serif;
     }
 
     #memoryInput::placeholder {
@@ -87,7 +65,7 @@
     }
 
     #saveBtn {
-      padding: 8px 16px;
+      padding: 10px 20px;
       background-color: #f7c5e0;
       border: none;
       border-radius: 8px;
@@ -105,6 +83,56 @@
       cursor: pointer;
       border-radius: 6px;
     }
+
+    /* 모달 스타일 */
+    #noteModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.4);
+      justify-content: center;
+      align-items: center;
+      z-index: 999;
+    }
+
+    #noteContent {
+      position: relative;
+      width: 300px;
+      height: 250px;
+      background-image: url('note.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+
+    #noteText {
+      font-size: 16px;
+      color: #7a1c40;
+      font-family: 'Segoe UI', sans-serif;
+      word-break: break-word;
+      max-width: 220px;
+    }
+
+    #closeModal {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ffccda;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      font-weight: bold;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -113,24 +141,35 @@
   <div id="bottle"></div>
 
   <div id="memoryInputBox">
-    <input id="memoryInput" type="text" placeholder="기억을 적어보세요 🌸" />
+    <textarea id="memoryInput" placeholder="기억을 적어보세요 🌸"></textarea>
     <button id="saveBtn">기억 저장</button>
   </div>
 
   <button id="resetBtn" onclick="resetMemories()">기억 리셋</button>
 
+  <!-- 모달 쪽지 -->
+  <div id="noteModal">
+    <div id="noteContent">
+      <button id="closeModal">X</button>
+      <div id="noteText"></div>
+    </div>
+  </div>
+
   <script>
     const memories = JSON.parse(localStorage.getItem("memories") || "[]");
-
     const bottle = document.getElementById("bottle");
     const memoryInput = document.getElementById("memoryInput");
+    const noteModal = document.getElementById("noteModal");
+    const noteText = document.getElementById("noteText");
+    const closeModal = document.getElementById("closeModal");
 
     document.getElementById("saveBtn").onclick = () => {
       const text = memoryInput.value.trim();
       if (text === "") return;
 
-      const left = Math.random() * 230;
-      const top = Math.random() * 230;
+      // 범위 제한 (유리병 내)
+      const left = Math.random() * 220;
+      const top = Math.random() * 220;
 
       const memory = { text, left, top };
       memories.push(memory);
@@ -150,23 +189,18 @@
       crane.src = "crane_transparent.png";
       crane.className = "crane";
 
-      const noteContainer = document.createElement("div");
-      noteContainer.className = "note-container";
-
-      const noteText = document.createElement("div");
-      noteText.className = "note-text";
-      noteText.textContent = memory.text;
-
-      noteContainer.appendChild(noteText);
-
       crane.onclick = () => {
-        noteContainer.style.display = noteContainer.style.display === "none" ? "flex" : "none";
+        noteText.textContent = memory.text;
+        noteModal.style.display = "flex";
       };
 
-      craneContainer.appendChild(noteContainer);
       craneContainer.appendChild(crane);
       bottle.appendChild(craneContainer);
     }
+
+    closeModal.onclick = () => {
+      noteModal.style.display = "none";
+    };
 
     function resetMemories() {
       localStorage.removeItem("memories");
