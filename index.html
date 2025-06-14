@@ -14,6 +14,10 @@
       padding: 30px;
     }
 
+    h1 {
+      color: #d26b9e;
+    }
+
     #bottle {
       position: relative;
       width: 300px;
@@ -22,7 +26,6 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: center;
-      border: 2px solid transparent;
     }
 
     .crane {
@@ -30,65 +33,66 @@
       width: 70px;
       transition: all 0.3s;
       cursor: pointer;
+      z-index: 1;
     }
 
-    .note {
+    .note-container {
       position: absolute;
-      top: -35px;
-      left: 0px;
-      background: #fff0f6;
-      padding: 5px 8px;
-      border-radius: 12px;
-      font-size: 13px;
-      max-width: 100px;
-      word-break: break-word;
+      top: -100px;
+      left: -20px;
+      width: 120px;
+      height: 90px;
+      background-image: url('note.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: center;
+      display: none;
+      justify-content: center;
+      align-items: center;
       text-align: center;
-      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-      color: #a33366;
-      border: 1px solid #f5c1d4;
+      padding: 10px;
       z-index: 2;
-      display: none;
-      pointer-events: none;
     }
 
-    #writeBtn {
-      padding: 10px 16px;
-      font-size: 16px;
-      background-color: #f7c5e0;
-      border: none;
-      cursor: pointer;
-      border-radius: 6px;
-      margin-top: 20px;
-    }
-
-    #noteImage {
-      display: none;
-      margin-top: 20px;
-      cursor: pointer;
-      width: 150px;
+    .note-text {
+      font-size: 13px;
+      color: #a33366;
+      font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+      word-break: break-word;
+      max-width: 100px;
     }
 
     #memoryInputBox {
-      display: none;
+      display: flex;
       flex-direction: column;
       align-items: center;
-      margin-top: 10px;
+      margin-top: 20px;
+      background-color: #ffe6f0;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
 
     #memoryInput {
-      padding: 8px;
+      padding: 10px;
       font-size: 16px;
-      width: 200px;
-      margin-bottom: 10px;
+      width: 240px;
+      border: 1px solid #f0a9cc;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+
+    #memoryInput::placeholder {
+      color: #d777a9;
     }
 
     #saveBtn {
-      padding: 6px 12px;
+      padding: 8px 16px;
       background-color: #f7c5e0;
       border: none;
-      border-radius: 6px;
+      border-radius: 8px;
       cursor: pointer;
+      font-size: 15px;
     }
 
     #resetBtn {
@@ -108,13 +112,9 @@
 
   <div id="bottle"></div>
 
-  <button id="writeBtn">쪽지 쓰기</button>
-
-  <img id="noteImage" src="note.png" alt="쪽지 이미지" />
-
   <div id="memoryInputBox">
-    <input id="memoryInput" type="text" placeholder="기억을 적어주세요" />
-    <button id="saveBtn">저장</button>
+    <input id="memoryInput" type="text" placeholder="기억을 적어보세요 🌸" />
+    <button id="saveBtn">기억 저장</button>
   </div>
 
   <button id="resetBtn" onclick="resetMemories()">기억 리셋</button>
@@ -123,18 +123,7 @@
     const memories = JSON.parse(localStorage.getItem("memories") || "[]");
 
     const bottle = document.getElementById("bottle");
-    const noteImage = document.getElementById("noteImage");
-    const memoryInputBox = document.getElementById("memoryInputBox");
     const memoryInput = document.getElementById("memoryInput");
-
-    document.getElementById("writeBtn").onclick = () => {
-      noteImage.style.display = "block";
-      memoryInputBox.style.display = "none";
-    };
-
-    noteImage.onclick = () => {
-      memoryInputBox.style.display = "flex";
-    };
 
     document.getElementById("saveBtn").onclick = () => {
       const text = memoryInput.value.trim();
@@ -149,8 +138,6 @@
 
       renderCrane(memory);
       memoryInput.value = "";
-      memoryInputBox.style.display = "none";
-      noteImage.style.display = "none";
     };
 
     function renderCrane(memory) {
@@ -163,15 +150,20 @@
       crane.src = "crane_transparent.png";
       crane.className = "crane";
 
-      const note = document.createElement("div");
-      note.textContent = memory.text;
-      note.className = "note";
+      const noteContainer = document.createElement("div");
+      noteContainer.className = "note-container";
+
+      const noteText = document.createElement("div");
+      noteText.className = "note-text";
+      noteText.textContent = memory.text;
+
+      noteContainer.appendChild(noteText);
 
       crane.onclick = () => {
-        note.style.display = note.style.display === "none" ? "block" : "none";
+        noteContainer.style.display = noteContainer.style.display === "none" ? "flex" : "none";
       };
 
-      craneContainer.appendChild(note);
+      craneContainer.appendChild(noteContainer);
       craneContainer.appendChild(crane);
       bottle.appendChild(craneContainer);
     }
@@ -181,7 +173,6 @@
       location.reload();
     }
 
-    // 기존 저장된 기억 렌더링
     memories.forEach(renderCrane);
   </script>
 </body>
